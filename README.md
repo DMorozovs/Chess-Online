@@ -1,63 +1,68 @@
 # Chess Online
 
-Браузерная шахматная игра на чистом JavaScript, без фреймворков и без бэкенда.
-Игра против компьютера, игра вдвоём за одним экраном, режим лобби с рейтингом,
-система прогресса и магазин оформления. Работает на десктопе и на телефоне.
+*[Русская версия](README.ru.md)*
 
-**Демо:** https://dmorozovs.github.io/Chess-Online/
+A browser chess game written in vanilla JavaScript — no frameworks, no backend.
+Play against the computer, play locally with a friend on one screen, or enter the
+ranked lobby. Includes a progression system and a cosmetics shop. Works on desktop
+and mobile.
 
-![Скриншот](screenshot.png)
+**Live demo:** https://dmorozovs.github.io/Chess-Online/
 
----
-
-## Что реализовано
-
-### Шахматный движок
-Полные правила игры, написанные с нуля:
-
-- генерация ходов для всех фигур, включая скользящие (ферзь, ладья, слон);
-- рокировка в обе стороны с проверкой, что король не под шахом и не проходит через атакованные поля;
-- взятие на проходе;
-- превращение пешки;
-- определение шаха, мата и пата;
-- фильтрация ходов, после которых собственный король остаётся под шахом.
-
-### Компьютерный противник
-Минимакс с альфа-бета отсечением и позиционной оценкой доски.
-Три уровня сложности задаются глубиной поиска. Та же функция используется
-для подсказки лучшего хода игроку.
-
-### Интерфейс и состояние
-- рендер доски, подсветка выбранной фигуры, доступных ходов и шаха;
-- часы с контролем времени и обработкой поражения по времени;
-- лог ходов, список побитых фигур;
-- переключение тёмной и светлой темы;
-- локализация (русский / английский) через словарь и функцию `t(key)`;
-- адаптивная вёрстка на CSS Grid и кастомных свойствах, поддержка тач-устройств.
-
-### Аккаунты и прогресс
-- регистрация, вход и восстановление доступа;
-- пароли не хранятся в открытом виде — хешируются через `crypto.subtle` (SHA-256) с солью;
-- хранилище вынесено за абстракцию `Store`, поэтому localStorage можно заменить
-  на реальный бэкенд, не переписывая остальной код;
-- статистика, ранги, опыт, достижения, история партий, ежедневные задания,
-  внутренняя валюта и магазин скинов доски и фигур.
+![Screenshot](screenshot.png)
 
 ---
 
-## Стек
+## Features
 
-HTML, CSS, JavaScript (ES6+). Без библиотек, без сборщика, без зависимостей.
+### Chess engine
+Complete rules, implemented from scratch:
 
-## Структура
+- move generation for every piece, including sliding pieces (queen, rook, bishop);
+- castling on both sides, with checks that the king is not in check and does not
+  pass through an attacked square;
+- en passant capture;
+- pawn promotion;
+- check, checkmate and stalemate detection;
+- filtering out moves that would leave your own king in check.
+
+### Computer opponent
+Minimax with alpha-beta pruning and positional board evaluation.
+Three difficulty levels are set by search depth. The same function powers the
+in-game hint that suggests the best move to the player.
+
+### Interface and state
+- board rendering with highlights for the selected piece, legal moves and check;
+- game clock with time control and loss-on-time handling;
+- move log and captured-piece tray;
+- dark and light themes;
+- localization (English / Russian) via a dictionary and a `t(key)` lookup;
+- responsive layout built on CSS Grid and custom properties, with touch support.
+
+### Accounts and progression
+- registration, login and account recovery;
+- passwords are never stored in plain text — they are hashed with `crypto.subtle`
+  (SHA-256) and a per-user salt;
+- storage sits behind a `Store` abstraction, so localStorage can be swapped for a
+  real backend without rewriting the rest of the code;
+- statistics, ranks, XP, achievements, match history, daily tasks, in-game currency
+  and a shop for board and piece skins.
+
+---
+
+## Tech stack
+
+HTML, CSS, JavaScript (ES6+). No libraries, no build step, no dependencies.
+
+## Project structure
 
 ```
-index.html   — разметка всех экранов
-style.css    — стили, темы, адаптив
-script.js    — движок, ИИ, состояние, рендер, хранилище
+index.html   — markup for all screens
+style.css    — styles, themes, responsive layout
+script.js    — engine, AI, state, rendering, storage
 ```
 
-## Как запустить локально
+## Running locally
 
 ```bash
 git clone https://github.com/DMorozovs/Chess-Online.git
@@ -65,13 +70,13 @@ cd Chess-Online
 python3 -m http.server 8000
 ```
 
-Открыть http://localhost:8000
+Then open http://localhost:8000
 
-Просто открыть `index.html` двойным кликом тоже работает, но локальный сервер
-надёжнее — часть браузерных API недоступна по протоколу `file://`.
+Opening `index.html` directly also works, but a local server is more reliable —
+some browser APIs are unavailable over the `file://` protocol.
 
-## Что дальше
+## Roadmap
 
-- [ ] реальный мультиплеер через WebSocket вместо симуляции лобби
-- [ ] экспорт партии в PGN
-- [ ] отмена хода и разбор партии
+- [ ] real multiplayer over WebSocket instead of a simulated lobby
+- [ ] PGN export
+- [ ] move takeback and game review
