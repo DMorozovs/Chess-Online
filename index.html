@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Шахматы Онлайн</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="bg-motif"></div>
+
+<!-- section scroll rail -->
+<div class="scroll-rail" id="scroll-rail">
+  <div class="rail-track"><div class="rail-progress" id="rail-progress"></div></div>
+  <div class="rail-dots" id="rail-dots"></div>
+</div>
+
+<!-- ================= AUTH SCREEN ================= -->
+<div id="screen-auth" class="screen active">
+  <div class="auth-wrap">
+    <div class="auth-hero">
+      <span class="eyebrow font-ui" data-i18n="eyebrow_auth">64 клетки · вечная игра</span>
+      <h1 class="font-display"><span data-i18n="brand1">Chess</span><br><em data-i18n="brand2">Online</em></h1>
+      <p class="font-ui" data-i18n="auth_desc">Играйте против компьютера, проходите обучение с подсказками или сразитесь с другом за одним экраном. Работает на компьютере и в телефоне.</p>
+      <div class="mini-board" id="mini-board"></div>
+    </div>
+    <div class="auth-card">
+      <div class="tab-row">
+        <button class="tab-btn active font-ui" id="tab-login" onclick="switchTab('login')" data-i18n="tab_login">Вход</button>
+        <button class="tab-btn font-ui" id="tab-register" onclick="switchTab('register')" data-i18n="tab_register">Регистрация</button>
+      </div>
+
+      <div id="pane-login">
+        <div class="field">
+          <label class="font-ui" data-i18n="login_id_label">Имя пользователя или e-mail</label>
+          <input type="text" id="login-id" placeholder="ник или email">
+        </div>
+        <div class="field">
+          <label class="font-ui" data-i18n="password_label">Пароль</label>
+          <div class="pw-wrap">
+            <input type="password" id="login-password" placeholder="••••••••">
+            <button class="pw-eye" type="button" onclick="togglePw('login-password', this)" title="show">👁</button>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="doLogin()" data-i18n="btn_login">Войти</button>
+        <div class="auth-msg font-ui" id="login-msg"></div>
+        <div class="switch-hint font-ui"><a onclick="switchTab('recover')" data-i18n="forgot_link">Забыли пароль?</a></div>
+        <div class="switch-hint font-ui"><span data-i18n="no_account">Нет аккаунта?</span> <a onclick="switchTab('register')" data-i18n="register_link">Зарегистрироваться</a></div>
+      </div>
+
+      <div id="pane-register" style="display:none;">
+        <div class="field">
+          <label class="font-ui" data-i18n="username_label">Имя пользователя</label>
+          <input type="text" id="reg-username" placeholder="ник">
+        </div>
+        <div class="field">
+          <label class="font-ui" data-i18n="email_label">E-mail</label>
+          <input type="email" id="reg-email" placeholder="you@example.com">
+        </div>
+        <div class="field">
+          <label class="font-ui" data-i18n="country_label">Страна</label>
+          <select id="reg-country"></select>
+        </div>
+        <div class="field">
+          <label class="font-ui" data-i18n="password_label">Пароль</label>
+          <div class="pw-wrap">
+            <input type="password" id="reg-password" placeholder="минимум 4 символа">
+            <button class="pw-eye" type="button" onclick="togglePw('reg-password', this)" title="show">👁</button>
+          </div>
+        </div>
+        <div class="field">
+          <label class="font-ui" data-i18n="password2_label">Повторите пароль</label>
+          <div class="pw-wrap">
+            <input type="password" id="reg-password2" placeholder="••••••••">
+            <button class="pw-eye" type="button" onclick="togglePw('reg-password2', this)" title="show">👁</button>
+          </div>
+        </div>
+        <div class="field">
+          <label class="font-ui" data-i18n="avatar_label">Выберите аватар</label>
+          <div class="avatar-row" id="avatar-row"></div>
+        </div>
+        <button class="btn-primary" onclick="doRegister()" data-i18n="btn_register">Создать аккаунт</button>
+        <div class="auth-msg font-ui" id="register-msg"></div>
+        <div class="switch-hint font-ui"><span data-i18n="have_account">Уже есть аккаунт?</span> <a onclick="switchTab('login')" data-i18n="login_link">Войти</a></div>
+      </div>
+
+      <div id="pane-recover" style="display:none;">
+        <div class="field">
+          <label class="font-ui" data-i18n="login_id_label">Имя пользователя или e-mail</label>
+          <input type="text" id="rec-id" placeholder="ник или email">
+          <button class="game-btn" style="margin-top:10px;" onclick="findAccountForRecovery()" data-i18n="btn_find_account">Найти аккаунт</button>
+        </div>
+
+        <div id="rec-step2" style="display:none;">
+          <div class="field">
+            <label class="font-ui" data-i18n="confirm_email_label">Подтвердите e-mail аккаунта</label>
+            <input type="email" id="rec-email" placeholder="you@example.com">
+            <div class="rec-hint font-ui" id="rec-hint">—</div>
+          </div>
+          <div class="field">
+            <label class="font-ui" data-i18n="new_password_label">Новый пароль</label>
+            <div class="pw-wrap">
+              <input type="password" id="rec-password" placeholder="минимум 4 символа">
+              <button class="pw-eye" type="button" onclick="togglePw('rec-password', this)" title="show">👁</button>
+            </div>
+          </div>
+          <div class="field">
+            <label class="font-ui" data-i18n="password2_label">Повторите пароль</label>
+            <div class="pw-wrap">
+              <input type="password" id="rec-password2" placeholder="••••••••">
+              <button class="pw-eye" type="button" onclick="togglePw('rec-password2', this)" title="show">👁</button>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="doRecover()" data-i18n="btn_reset_password">Сменить пароль</button>
+        </div>
+
+        <div class="auth-msg font-ui" id="recover-msg"></div>
+        <div class="switch-hint font-ui"><a onclick="switchTab('login')" data-i18n="back_to_login">Вернуться ко входу</a></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="auth-corner">
+    <div class="lang-picker" id="lang-picker">
+      <button class="lang-icon" type="button" id="lang-icon-btn" onclick="toggleLangMenu(event)" aria-haspopup="true" title="Language">
+        <span class="globe">🌐</span><span class="cur-lang" id="cur-lang-code">RU</span>
+      </button>
+      <div class="lang-menu" id="lang-menu"></div>
+    </div>
+
+    <button class="theme-toggle" type="button" id="theme-toggle" onclick="flipTheme()" title="Theme">
+      <span class="tt-icon sun">☀</span>
+      <span class="tt-icon moon">☾</span>
+      <span class="tt-knob"></span>
+    </button>
+  </div>
+</div>
+
+<!-- ================= MENU SCREEN ================= -->
+<div id="screen-menu" class="screen">
+  <div class="topnav">
+    <div class="brand brand-link" onclick="goHome()" role="button" tabindex="0" title="menu"><span class="pc">♞</span> <span data-i18n="brand_full">Chess Online</span></div>
+    <div class="nav-right">
+      <div class="currency-chip clickable" onclick="openTopup()" role="button" tabindex="0" title="+"><span>🪙</span> <span id="curr-menu">0</span> <span class="plus">+</span></div>
+      <div class="profile-menu">
+        <div class="user-chip" onclick="onProfileChipClick(event, this)" title="profile">
+          <span class="av" id="avatar-menu">♟</span><span id="username-menu">игрок</span><span class="chev">▾</span>
+        </div>
+        <div class="profile-dropdown">
+          <button class="dd-item" onclick="closeProfileMenus(); showProfile()"><span>👤</span><span data-i18n="nav_profile">Мой профиль</span></button>
+          <button class="dd-item" onclick="closeProfileMenus(); showShop()"><span>🛒</span><span data-i18n="nav_shop">Магазин</span></button>
+          <button class="dd-item" onclick="closeProfileMenus(); showAchievements()"><span>🏆</span><span data-i18n="nav_achievements">Достижения</span></button>
+          <button class="dd-item" onclick="closeProfileMenus(); openSettings()"><span>⚙</span><span data-i18n="settings_title">Настройки</span></button>
+          <button class="dd-item danger" onclick="closeProfileMenus(); logout()"><span>⏻</span><span data-i18n="nav_logout">Выйти</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="menu-hero" id="sec-rank">
+    <span class="eyebrow font-ui" data-i18n="eyebrow_menu">выберите режим</span>
+    <h2 class="font-display"><span data-i18n="menu_h2a">Партия начинается</span> <em data-i18n="menu_h2b">здесь</em></h2>
+    <div class="rank-banner clickable" id="rank-banner" onclick="openRanks()" role="button" tabindex="0" title="ranks">
+      <div class="rank-name"><span id="rank-title-txt">Пешка</span><span class="rank-info">ⓘ</span></div>
+      <div class="rank-bar-track"><div class="rank-bar-fill" id="rank-bar-fill"></div></div>
+      <div class="rank-xp-txt" id="rank-xp-txt">0 / 100 XP</div>
+    </div>
+  </div>
+  <div class="mode-grid" id="sec-modes">
+    <div class="mode-card">
+      <div class="accent-bar"></div>
+      <div class="num font-ui">01</div>
+      <div class="glyph">♛</div>
+      <h3 class="font-display" data-i18n="mode3_title">Онлайн</h3>
+      <p class="font-ui" data-i18n="mode3_desc">Найдите соперника в лобби: присоединяйтесь к открытой комнате или создайте свою. В обычном режиме 3 подсказки, в соревновательном — ни одной.</p>
+      <div class="diff-row">
+        <button class="diff-btn" onclick="openLobby('casual')" data-i18n="online_casual">Обычный</button>
+        <button class="diff-btn accent-comp" onclick="openLobby('competitive')" data-i18n="online_competitive">Соревновательный</button>
+      </div>
+      <div class="mode-subnote font-ui" data-i18n="online_comp_note">Соревновательный режим — со ставкой игровой валюты и таймером ♟ 10 минут</div>
+    </div>
+    <div class="mode-card">
+      <div class="accent-bar"></div>
+      <div class="num font-ui">02</div>
+      <div class="glyph">♜</div>
+      <h3 class="font-display" data-i18n="mode1_title">Игра с ботом</h3>
+      <p class="font-ui" data-i18n="mode1_desc">Выберите уровень сложности и сыграйте против движка. Включите помощника, если не уверены в ходе.</p>
+      <div class="diff-row">
+        <button class="diff-btn" onclick="startBotGame('easy')" data-i18n="diff_easy">Лёгкий</button>
+        <button class="diff-btn" onclick="startBotGame('medium')" data-i18n="diff_medium">Средний</button>
+        <button class="diff-btn" onclick="startBotGame('hard')" data-i18n="diff_hard">Сложный</button>
+      </div>
+      <div class="mode-subnote font-ui" data-i18n="bot_hard_note">На сложном уровне включается шахматный таймер ♟ 10 минут</div>
+    </div>
+    <div class="mode-card" onclick="startTutorial()">
+      <div class="accent-bar"></div>
+      <div class="num font-ui">03</div>
+      <div class="glyph">♗</div>
+      <h3 class="font-display" data-i18n="mode2_title">Обучение</h3>
+      <p class="font-ui" data-i18n="mode2_desc">Свободная доска без ограничений хода — изучайте, как ходит каждая фигура.</p>
+    </div>
+  </div>
+
+  <div class="tasks-section" id="sec-tasks">
+    <h3 class="font-ui" data-i18n="tasks_title">Задания за валюту</h3>
+    <div class="tasks-grid" id="tasks-grid"></div>
+  </div>
+
+  <div class="leaderboard-section" id="sec-leaders">
+    <h3 class="font-ui" data-i18n="leaderboard_title">Топ игроков</h3>
+    <div class="leaderboard" id="leaderboard"></div>
+  </div>
+</div>
+
+<!-- ================= GAME SCREEN ================= -->
+<div id="screen-game" class="screen">
+  <div class="topnav" style="width:100%; max-width:920px;">
+    <div class="brand brand-link" onclick="goHome()" role="button" tabindex="0" title="menu"><span class="pc">♞</span> <span data-i18n="brand_full">Chess Online</span></div>
+    <div class="nav-right">
+      <div class="currency-chip clickable" onclick="openTopup()" role="button" tabindex="0" title="+"><span>🪙</span> <span id="curr-game">0</span> <span class="plus">+</span></div>
+      <div class="profile-menu">
+        <div class="user-chip" onclick="onProfileChipClick(event, this)" title="profile">
+          <span class="av" id="avatar-game">♟</span><span id="username-game">игрок</span><span class="chev">▾</span>
+        </div>
+        <div class="profile-dropdown">
+          <button class="dd-item" onclick="closeProfileMenus(); showProfile()"><span>👤</span><span data-i18n="nav_profile">Мой профиль</span></button>
+          <button class="dd-item" onclick="closeProfileMenus(); showShop()"><span>🛒</span><span data-i18n="nav_shop">Магазин</span></button>
+          <button class="dd-item" onclick="closeProfileMenus(); showAchievements()"><span>🏆</span><span data-i18n="nav_achievements">Достижения</span></button>
+          <button class="dd-item" onclick="closeProfileMenus(); openSettings()"><span>⚙</span><span data-i18n="settings_title">Настройки</span></button>
+          <button class="dd-item danger" onclick="closeProfileMenus(); logout()"><span>⏻</span><span data-i18n="nav_logout">Выйти</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="game-topbar">
+    <div class="game-title font-ui" id="game-title">Игра</div>
+    <div class="game-status font-ui" id="game-status">Ход белых</div>
+  </div>
+  <div class="clock-row" id="clock-row" style="display:none;">
+    <div class="clock-chip" id="clock-black"><span class="clock-label" data-i18n="clock_black">Чёрные</span><span class="clock-time" id="clock-black-time">10:00</span></div>
+    <div class="clock-chip" id="clock-white"><span class="clock-label" data-i18n="clock_white">Белые</span><span class="clock-time" id="clock-white-time">10:00</span></div>
+  </div>
+  <div class="game-layout">
+    <div class="board-wrap"><div id="board"></div></div>
+    <div class="side-panel">
+      <div class="panel-box" id="tutorial-panel" style="display:none;">
+        <h4 class="font-ui" data-i18n="hint_label">Подсказка</h4>
+        <div class="tutorial-box" id="tutorial-text" data-i18n="tutorial_default">Выберите фигуру, чтобы увидеть её ходы.</div>
+      </div>
+      <div class="panel-box" id="assistant-panel" style="display:none;">
+        <h4 class="font-ui" data-i18n="assistant_label">Помощник</h4>
+        <button class="game-btn accent" id="hint-btn" onclick="showHint()" data-i18n="btn_hint">Подсказать ход</button>
+        <div class="hint-text" id="hint-text"></div>
+      </div>
+      <div class="panel-box">
+        <h4 class="font-ui" data-i18n="captured_label">Взятые фигуры</h4>
+        <div class="captured-row" id="captured-white"></div>
+        <div class="captured-row" id="captured-black"></div>
+      </div>
+      <div class="panel-box">
+        <h4 class="font-ui" data-i18n="moves_label">Ходы</h4>
+        <div class="moves-log" id="moves-log"></div>
+      </div>
+      <button class="game-btn" onclick="restartGame()" data-i18n="btn_restart">Начать заново</button>
+      <button class="game-btn" onclick="backToMenu()" data-i18n="btn_exit_menu">Выйти в меню</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= LOBBY SCREEN ================= -->
+<div id="screen-lobby" class="screen">
+  <div class="topnav">
+    <div class="brand brand-link" onclick="goHome()" role="button" tabindex="0" title="menu"><span class="pc">♞</span> <span data-i18n="brand_full">Chess Online</span></div>
+    <div class="nav-right">
+      <div class="currency-chip clickable" onclick="openTopup()" role="button" tabindex="0" title="+"><span>🪙</span> <span id="curr-lobby">0</span> <span class="plus">+</span></div>
+      <div class="profile-menu">
+        <div class="user-chip" onclick="onProfileChipClick(event, this)" title="profile">
+          <span class="av" id="avatar-lobby">♟</span><span id="username-lobby">игрок</span><span class="chev">▾</span>
+        </div>
+        <div class="profile-dropdown">
+          <button class="dd-item" onclick="closeProfileMenus(); showProfile()"><span>👤</span><span data-i18n="nav_profile">Мой профиль</span></button>
+          <button class="dd-item" onclick="closeProfileMenus(); showShop()"><span>🛒</span><span data-i18n="nav_shop">Магазин</span></button>
+          <button class="dd-item" onclick="closeProfileMenus(); showAchievements()"><span>🏆</span><span data-i18n="nav_achievements">Достижения</span></button>
+          <button class="dd-item" onclick="closeProfileMenus(); openSettings()"><span>⚙</span><span data-i18n="settings_title">Настройки</span></button>
+          <button class="dd-item danger" onclick="closeProfileMenus(); logout()"><span>⏻</span><span data-i18n="nav_logout">Выйти</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lobby-body">
+    <div class="lobby-head" id="sec-lobbyhead">
+      <span class="eyebrow font-ui" id="lobby-eyebrow">лобби</span>
+      <h2 class="font-display" id="lobby-title">Поиск соперника</h2>
+      <div class="lobby-note font-ui" id="lobby-note"></div>
+    </div>
+
+    <!-- waiting state -->
+    <div class="waiting-box" id="waiting-box" style="display:none;">
+      <div class="waiting-spinner"></div>
+      <div class="waiting-title font-display" id="waiting-title">Ожидание соперника</div>
+      <div class="waiting-sub font-ui" id="waiting-sub">—</div>
+      <div class="waiting-timer" id="waiting-timer">0:00</div>
+      <button class="game-btn" style="max-width:220px; margin:18px auto 0;" onclick="cancelWaiting()" data-i18n="btn_cancel_wait">Отменить</button>
+    </div>
+
+    <!-- ready check -->
+    <div class="ready-box" id="ready-box" style="display:none;">
+      <div class="ready-head font-display" data-i18n="ready_title">Комната собрана</div>
+      <div class="ready-terms font-ui" id="ready-terms">—</div>
+      <div class="ready-players">
+        <div class="ready-player" id="ready-me">
+          <div class="rp-av" id="rp-me-av">♟</div>
+          <div class="rp-name" id="rp-me-name">вы</div>
+          <div class="rp-state font-ui" id="rp-me-state" data-i18n="ready_not">Не готов</div>
+        </div>
+        <div class="ready-vs font-display">vs</div>
+        <div class="ready-player" id="ready-opp">
+          <div class="rp-av" id="rp-opp-av">♞</div>
+          <div class="rp-name" id="rp-opp-name">соперник</div>
+          <div class="rp-state font-ui" id="rp-opp-state" data-i18n="ready_not">Не готов</div>
+        </div>
+      </div>
+      <button class="btn-primary" id="ready-btn" style="max-width:260px; margin:22px auto 0;" onclick="toggleReady()" data-i18n="btn_ready">Я готов</button>
+      <button class="game-btn" style="max-width:260px; margin:10px auto 0;" onclick="leaveReadyRoom()" data-i18n="btn_leave_room">Покинуть комнату</button>
+      <div class="ready-hint font-ui" id="ready-hint" data-i18n="ready_hint">Партия начнётся, когда оба игрока подтвердят готовность.</div>
+    </div>
+
+    <!-- rooms -->
+    <div id="lobby-main">
+      <div id="sec-rooms"></div>
+      <button class="btn-primary lobby-create" onclick="createRoom()" data-i18n="btn_create_room">Создать комнату</button>
+      <div class="rooms-head font-ui">
+        <span data-i18n="rooms_open">Открытые комнаты</span>
+        <button class="nav-link" onclick="refreshRooms()" data-i18n="btn_refresh">Обновить</button>
+      </div>
+      <div class="rooms-list" id="rooms-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SHOP SCREEN ================= -->
+<div id="screen-shop" class="screen">
+  <div class="topnav">
+    <div class="brand brand-link" onclick="goHome()" role="button" tabindex="0" title="menu"><span class="pc">♞</span> <span data-i18n="brand_full">Chess Online</span></div>
+    <div class="nav-right">
+      <div class="currency-chip clickable" onclick="openTopup()" role="button" tabindex="0" title="+"><span>🪙</span> <span id="curr-shop">0</span> <span class="plus">+</span></div>
+      <div class="profile-menu">
+        <div class="user-chip" onclick="onProfileChipClick(event, this)" title="profile">
+          <span class="av" id="avatar-shop">♟</span><span id="username-shop">игрок</span><span class="chev">▾</span>
+        </div>
+        <div class="profile-dropdown">
+          <button class="dd-item" onclick="closeProfileMenus(); showProfile()"><span>👤</span><span data-i18n="nav_profile">Мой профиль</span></button>
+          <button class="dd-item" onclick="closeProfileMenus(); showShop()"><span>🛒</span><span data-i18n="nav_shop">Магазин</span></button>
+          <button class="dd-item" onclick="closeProfileMenus(); showAchievements()"><span>🏆</span><span data-i18n="nav_achievements">Достижения</span></button>
+          <button class="dd-item" onclick="closeProfileMenus(); openSettings()"><span>⚙</span><span data-i18n="settings_title">Настройки</span></button>
+          <button class="dd-item danger" onclick="closeProfileMenus(); logout()"><span>⏻</span><span data-i18n="nav_logout">Выйти</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="shop-body">
+    <div class="shop-head" id="sec-shophead">
+      <span class="eyebrow font-ui" data-i18n="shop_eyebrow">за монеты</span>
+      <h2 class="font-display" data-i18n="shop_title">Магазин скинов</h2>
+      <div class="shop-preview" id="shop-preview"></div>
+      <div class="preview-banner" id="preview-banner" style="display:none;">
+        <span class="pv-label" id="preview-label"></span>
+        <button class="preview-reset" onclick="clearSkinPreview()" data-i18n="btn_preview_reset">Показать мои скины</button>
+      </div>
+    </div>
+
+    <h3 class="shop-section font-ui" id="sec-boards" data-i18n="shop_boards">Доски</h3>
+    <div class="shop-grid" id="shop-boards"></div>
+
+    <h3 class="shop-section font-ui" id="sec-pieces" data-i18n="shop_pieces">Фигуры</h3>
+    <div class="shop-grid" id="shop-pieces"></div>
+  </div>
+</div>
+
+<!-- ================= PROFILE SCREEN ================= -->
+<div id="screen-profile" class="screen">
+  <div class="topnav">
+    <div class="brand brand-link" onclick="goHome()" role="button" tabindex="0" title="menu"><span class="pc">♞</span> <span data-i18n="brand_full">Chess Online</span></div>
+    <div class="nav-right">
+      <div class="currency-chip clickable" onclick="openTopup()" role="button" tabindex="0" title="+"><span>🪙</span> <span id="curr-prof">0</span> <span class="plus">+</span></div>
+      <div class="profile-menu">
+        <div class="user-chip" onclick="onProfileChipClick(event, this)" title="profile">
+          <span class="av" id="avatar-prof">♟</span><span id="username-prof">игрок</span><span class="chev">▾</span>
+        </div>
+        <div class="profile-dropdown">
+          <button class="dd-item" onclick="closeProfileMenus(); showProfile()"><span>👤</span><span data-i18n="nav_profile">Мой профиль</span></button>
+          <button class="dd-item" onclick="closeProfileMenus(); showShop()"><span>🛒</span><span data-i18n="nav_shop">Магазин</span></button>
+          <button class="dd-item" onclick="closeProfileMenus(); showAchievements()"><span>🏆</span><span data-i18n="nav_achievements">Достижения</span></button>
+          <button class="dd-item" onclick="closeProfileMenus(); openSettings()"><span>⚙</span><span data-i18n="settings_title">Настройки</span></button>
+          <button class="dd-item danger" onclick="closeProfileMenus(); logout()"><span>⏻</span><span data-i18n="nav_logout">Выйти</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="profile-body">
+    <div class="profile-card" id="sec-profcard">
+      <div class="prof-avatar" id="prof-avatar">♟</div>
+      <div class="prof-name font-display" id="prof-name">игрок</div>
+      <div class="prof-email font-ui" id="prof-email">—</div>
+
+      <div class="prof-rank-block">
+        <div class="prof-rank-icon" id="prof-rank-icon">♙</div>
+        <div class="prof-rank-name font-display" id="prof-rank-name">Пешка</div>
+        <div class="rank-bar-track"><div class="rank-bar-fill" id="prof-rank-fill"></div></div>
+        <div class="rank-xp-txt" id="prof-rank-xp">0 XP</div>
+      </div>
+
+      <div class="prof-actions">
+        <button class="game-btn" onclick="openSettings()" data-i18n="settings_title">Настройки</button>
+        <button class="game-btn" onclick="showAchievements()" data-i18n="nav_achievements">Достижения</button>
+        <button class="game-btn" onclick="logout()" data-i18n="nav_logout">Выйти</button>
+      </div>
+    </div>
+
+    <h3 class="prof-section-title font-ui" id="sec-profstats" data-i18n="prof_stats_title">Статистика</h3>
+    <div class="prof-stats-grid" id="prof-stats-grid"></div>
+
+    <h3 class="prof-section-title font-ui" id="sec-profhistory" data-i18n="prof_history_title">История партий</h3>
+    <div class="history-list" id="prof-history"></div>
+  </div>
+</div>
+
+<!-- ================= ACHIEVEMENTS SCREEN ================= -->
+<div id="screen-achievements" class="screen">
+  <div class="topnav">
+    <div class="brand brand-link" onclick="goHome()" role="button" tabindex="0" title="menu"><span class="pc">♞</span> <span data-i18n="brand_full">Chess Online</span></div>
+    <div class="nav-right">
+      <div class="currency-chip clickable" onclick="openTopup()" role="button" tabindex="0" title="+"><span>🪙</span> <span id="curr-ach">0</span> <span class="plus">+</span></div>
+      <div class="profile-menu">
+        <div class="user-chip" onclick="onProfileChipClick(event, this)" title="profile">
+          <span class="av" id="avatar-ach">♟</span><span id="username-ach">игрок</span><span class="chev">▾</span>
+        </div>
+        <div class="profile-dropdown">
+          <button class="dd-item" onclick="closeProfileMenus(); showProfile()"><span>👤</span><span data-i18n="nav_profile">Мой профиль</span></button>
+          <button class="dd-item" onclick="closeProfileMenus(); showShop()"><span>🛒</span><span data-i18n="nav_shop">Магазин</span></button>
+          <button class="dd-item" onclick="closeProfileMenus(); showAchievements()"><span>🏆</span><span data-i18n="nav_achievements">Достижения</span></button>
+          <button class="dd-item" onclick="closeProfileMenus(); openSettings()"><span>⚙</span><span data-i18n="settings_title">Настройки</span></button>
+          <button class="dd-item danger" onclick="closeProfileMenus(); logout()"><span>⏻</span><span data-i18n="nav_logout">Выйти</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="ach-hero" id="sec-achhero">
+    <span class="eyebrow font-ui" data-i18n="eyebrow_ach">зал славы</span>
+    <h2 class="font-display"><span data-i18n="ach_h2a">Ваши</span> <em data-i18n="ach_h2b">достижения</em></h2>
+  </div>
+  <div class="stats-row" id="stats-row"></div>
+  <div id="sec-achlist"></div>
+  <div class="ach-grid" id="ach-grid"></div>
+  <div class="highlights-section" id="sec-highlights">
+    <h3 class="font-ui" data-i18n="highlights_label">Яркие моменты</h3>
+    <div id="highlights-list"></div>
+  </div>
+</div>
+
+<!-- result modal -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal-box">
+    <div class="glyph" id="modal-glyph">♔</div>
+    <h3 class="font-display" id="modal-title">Партия окончена</h3>
+    <p class="font-ui" id="modal-text"></p>
+    <div class="modal-actions">
+      <button class="btn-ghost font-ui" onclick="closeModal()" data-i18n="btn_to_menu">В меню</button>
+      <button class="btn-primary" style="flex:1" onclick="modalRematch()" data-i18n="btn_rematch">Реванш</button>
+    </div>
+  </div>
+</div>
+
+<!-- ad modal -->
+<div class="modal-bg" id="ad-bg">
+  <div class="modal-box">
+    <div class="glyph">📺</div>
+    <h3 class="font-display" data-i18n="ad_title">Рекламный ролик</h3>
+    <p class="font-ui"><span data-i18n="ad_text">Демонстрационная реклама. Награда будет доступна через</span> <b id="ad-count">5</b> <span data-i18n="ad_sec">сек.</span></p>
+  </div>
+</div>
+
+<!-- ranks modal -->
+<div class="modal-bg" id="ranks-bg" onclick="onBackdropClick(event, closeRanks)">
+  <div class="modal-box settings-box">
+    <h3 class="font-display" data-i18n="ranks_title" style="text-align:center; margin-bottom:6px;">Система рангов</h3>
+    <p class="font-ui" style="text-align:center; margin-bottom:18px;" id="ranks-sub"></p>
+    <div class="ranks-list" id="ranks-list"></div>
+    <div style="margin-top:18px;">
+      <button class="btn-ghost font-ui" style="width:100%;" onclick="closeRanks()" data-i18n="btn_close">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<!-- top up modal -->
+<div class="modal-bg" id="topup-bg" onclick="onBackdropClick(event, closeTopup)">
+  <div class="modal-box settings-box">
+    <h3 class="font-display" data-i18n="topup_title" style="text-align:center; margin-bottom:6px;">Пополнить баланс</h3>
+    <p class="font-ui" style="text-align:center; margin-bottom:16px;" id="topup-balance"></p>
+    <div class="demo-note" data-i18n="topup_demo">Демонстрационный магазин: настоящая оплата не проводится и деньги не списываются. Монеты начисляются сразу, чтобы можно было опробовать механику.</div>
+    <div class="topup-list" id="topup-list"></div>
+    <div style="margin-top:18px;">
+      <button class="btn-ghost font-ui" style="width:100%;" onclick="closeTopup()" data-i18n="btn_close">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<!-- create room modal -->
+<div class="modal-bg" id="createroom-bg" onclick="onBackdropClick(event, closeCreateRoom)">
+  <div class="modal-box settings-box">
+    <h3 class="font-display" data-i18n="create_room_title" style="text-align:center; margin-bottom:6px;">Новая комната</h3>
+    <p class="font-ui" id="createroom-sub" style="text-align:center; margin-bottom:20px;"></p>
+
+    <div class="cr-block">
+      <div class="cr-label font-ui" data-i18n="stake_label">Ставка на партию</div>
+      <div class="stake-input-row">
+        <button class="stake-step" type="button" onclick="bumpStake(-10)">−</button>
+        <input type="number" id="stake-input" step="10" min="0" value="0" oninput="onStakeInput()">
+        <span class="stake-coin">🪙</span>
+        <button class="stake-step" type="button" onclick="bumpStake(10)">+</button>
+      </div>
+      <div class="cr-options" id="stake-quick"></div>
+      <div class="cr-hint font-ui" id="stake-hint"></div>
+      <div class="cr-hint font-ui" id="stake-error" style="color:var(--burgundy-light);"></div>
+    </div>
+
+    <div class="cr-block" id="timer-block">
+      <div class="cr-label font-ui" data-i18n="timer_label">Контроль времени</div>
+      <div class="cr-options" id="timer-options"></div>
+    </div>
+
+    <div class="modal-actions" style="margin-top:22px;">
+      <button class="btn-ghost font-ui" onclick="closeCreateRoom()" data-i18n="btn_close">Закрыть</button>
+      <button class="btn-primary" style="flex:1" id="cr-confirm" onclick="confirmCreateRoom()" data-i18n="btn_create_room">Создать комнату</button>
+    </div>
+  </div>
+</div>
+
+<!-- settings modal -->
+<div class="modal-bg" id="settings-bg" onclick="onBackdropClick(event, closeSettings)">
+  <div class="modal-box settings-box">
+    <h3 class="font-display" data-i18n="settings_title" style="text-align:center; margin-bottom:18px;">Настройки</h3>
+
+    <div class="setting-row">
+      <div><div class="setting-label" data-i18n="setting_hints">Подсказки помощника</div><div class="setting-sub" data-i18n="setting_hints_sub">Показывать кнопку подсказки в игре</div></div>
+      <div class="toggle" id="toggle-hints" onclick="toggleHints()"><div class="knob"></div></div>
+    </div>
+
+    <div class="setting-row">
+      <div><div class="setting-label" data-i18n="setting_theme">Тема оформления</div><div class="setting-sub" data-i18n="setting_theme_sub">Светлая или тёмная</div></div>
+      <div class="seg" id="theme-switch-settings"></div>
+    </div>
+
+    <div class="setting-row">
+      <div><div class="setting-label" data-i18n="setting_lang">Язык интерфейса</div><div class="setting-sub" data-i18n="setting_lang_sub">Russian / English</div></div>
+      <div class="seg" id="lang-switch-settings"></div>
+    </div>
+
+    <div class="setting-row" id="settings-email-row">
+      <div><div class="setting-label" data-i18n="setting_email">E-mail аккаунта</div><div class="setting-sub" id="settings-email-value">—</div></div>
+    </div>
+
+    <div style="margin-top:22px;">
+      <button class="btn-ghost font-ui" style="width:100%;" onclick="closeSettings()" data-i18n="btn_close">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
