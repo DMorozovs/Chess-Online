@@ -4,7 +4,7 @@
 Игра против компьютера, игра вдвоём за одним экраном, режим лобби с рейтингом,
 система прогресса и магазин оформления. Работает на десктопе и на телефоне.
 
-**Демо:** https://ВАШ-НИК.github.io/chess-online/
+**Демо:** https://dmorozovs.github.io/Chess-Online/
 
 ![Скриншот](screenshot.png)
 
@@ -60,8 +60,8 @@ script.js    — движок, ИИ, состояние, рендер, хран�
 ## Как запустить локально
 
 ```bash
-git clone https://github.com/ВАШ-НИК/chess-online.git
-cd chess-online
+git clone https://github.com/DMorozovs/Chess-Online.git
+cd Chess-Online
 python3 -m http.server 8000
 ```
 
